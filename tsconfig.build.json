@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  // Only the client is published; the worker itself is deployed, not imported.
+  "include": ["src/client/**/*.ts", "worker-configuration.d.ts"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+}

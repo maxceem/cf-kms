@@ -1,0 +1,15 @@
+# Copy to .dev.vars for local `wrangler dev`. Never commit .dev.vars.
+#
+# Root key encryption keys. In production these are Worker secrets
+# (`wrangler secret put KEK_V1`), never `vars`. One value per version;
+# every version present here is accepted for unwrap.
+# Generate with: openssl rand -base64 32
+KEK_V1=""
+# KEK_V2=""
+
+# Optional overrides of wrangler.jsonc `vars`.
+#
+# Which version new wraps use. Must have a matching KEK_V<n> above.
+KEK_CURRENT_VERSION=1
+# Callers, by SHA-256 hash of their bearer token. See README > "Onboarding a caller".
+# CALLERS=[{"name":"acme","tokenHash":"<sha256 hex>","requiredContext":{"service":"acme"}}]

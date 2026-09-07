@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // One deployment per consuming service, each owning its own KEK, all in a
+  // dedicated security Cloudflare account. The name, route and caller
+  // allowlist are per deployment and belong in a gitignored
+  // `wrangler.<profile>.overlay.jsonc`; see README > "Deployment profiles".
+  // (wrangler rejects uppercase names, hence the lowercase placeholder)
+  "name": "cf-kms-change-me",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-22",
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1,
+    },
+  },
+  // This worker is reached only through the custom domain route a profile adds.
+  // Leaving workers.dev and preview URLs off keeps the decrypt endpoint off the
+  // public *.workers.dev namespace.
+  "workers_dev": false,
+  "preview_urls": false,
+  // Set per deployment. Cloudflare Custom Domains are exact-match only, so
+  // allocate one hostname per KMS deployment.
+  "routes": [],
+  "vars": {
+    // Which KEK version new wraps use. Must have a matching KEK_V<n> secret.
+    "KEK_CURRENT_VERSION": "1",
+    // JSON array of callers, set per deployment. Holds only SHA-256 hashes,
+    // never the tokens:
+    // [{ "name": "<service>",
+    //    "tokenHash": "<sha256 hex of ckms_<service>_…>",
+    //    "requiredContext": { "service": "<service>" } }]
+    "CALLERS": "[]",
+  },
+  // Secrets (never checked in, set with `wrangler secret put`):
+  //   KEK_V1  — base64 of 32 random bytes (`openssl rand -base64 32`)
+  //   KEK_V2, KEK_V3, … — added during rotation; every KEK_V<n> present is
+  //   accepted for unwrap, only KEK_CURRENT_VERSION is used for wrap.
+  //   See README > "KEK rotation runbook".
+}
